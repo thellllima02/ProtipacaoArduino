@@ -1,19 +1,25 @@
 #include <IRremote.h>
 
-const int irReceiverPin = 2;  // Pino conectado ao receptor IR
-IRrecv irReceiver(irReceiverPin);  // Inicializa o receptor IR no pino 2
-decode_results results;  // Estrutura para armazenar os dados decodificados
+const int irReceiverPin = 2; // Pino conectado ao receptor IR
 
 void setup() {
-  Serial.begin(9600);  // Inicializa a comunicação serial
-  irReceiver.begin(irReceiverPin);  // Inicia o receptor IR
+  Serial.begin(9600); // Inicializa a comunicação serial
+  pinMode(irReceiverPin, INPUT); // Define o pino do receptor IR como entrada
+
+  // Inicia o receptor IR (compatível com versões mais recentes da IRremote)
+  IrReceiver.begin(irReceiverPin, ENABLE_LED_FEEDBACK); 
   Serial.println("Aponte o controle remoto para o receptor e pressione um botão.");
 }
 
 void loop() {
-  if (irReceiver.decode(&results)) {
+  // Verifica se há dados disponíveis no receptor IR
+  if (IrReceiver.decode()) {
+    // Exibe o código recebido em hexadecimal
     Serial.print("Código recebido: 0x");
-    Serial.println(results.value, HEX);  // Exibe o código em hexadecimal
-    irReceiver.resume();  // Prepara o receptor para o próximo sinal
+    Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
+
+    // Reseta o receptor para o próximo sinal
+    IrReceiver.resume();
   }
 }
+
