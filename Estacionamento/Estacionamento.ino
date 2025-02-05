@@ -1,59 +1,26 @@
-const int distancia_carro = 10; 
+#include <IRremote.h>
 
-
-//Sensor
-const int TRIG = 3;
-const int ECHO = 2;
-
-//LED
-const int ledRed = 13;
-
+const int irReceiverPin = 2; // Pino conectado ao receptor IR
 
 void setup() {
-  Serial.begin(9600);
-  
-  // Configurações do Sensor
-  pinMode(TRIG,OUTPUT);
-  pinMode(ECHO,INPUT);
-  
-  // Configurações do LED
-  pinMode(ledRed, OUTPUT);  
+  Serial.begin(9600); // Inicializa a comunicação serial
+  pinMode(irReceiverPin, INPUT); // Define o pino do receptor IR como entrada
+
+  // Inicia o receptor IR (compatível com versões mais recentes da IRremote)
+  IrReceiver.begin(irReceiverPin, ENABLE_LED_FEEDBACK); 
+  Serial.println("Aponte o controle remoto para o receptor e pressione um botão.");
 }
 
 void loop() {
-  int distancia = sensor_morcego(TRIG,ECHO);
+  // Verifica se há dados disponíveis no receptor IR
+  if (IrReceiver.decode()) {
+    // Exibe o código recebido em hexadecimal
+    Serial.print("Código recebido: 0x");
+    Serial.println(IrReceiver.decodedIRData.decodedRawData, HEX);
 
-    if (distancia <= distancia_carro) {
-    Serial.print("Ocupado: ");
-    Serial.print(distancia);
-    Serial.println("cm");
-    digitalWrite(ledRed, HIGH);  // Liga o LED para "Ocupado"
-}
-else if (distancia <= 20) {
-    Serial.print("Cuidado: ");
-    Serial.print(distancia);
-    Serial.println("cm");
-    digitalWrite(ledRed, HIGH);  // Liga o LED para "Cuidado"
-}
-else {
-    Serial.print("Livre: ");
-    Serial.print(distancia);
-    Serial.println("cm");
-    digitalWrite(ledRed, LOW);   // Desliga o LED para "Livre"
+    // Reseta o receptor para o próximo sinal
+    IrReceiver.resume();
+  }
 }
 
-
-  delay(1000);
-  
-}
-
-int sensor_morcego(int pinotrig,int pinoecho){
-  digitalWrite(pinotrig,LOW);
-  delayMicroseconds(5);
-  digitalWrite(pinotrig,HIGH);
-  delayMicroseconds(20);
-  digitalWrite(pinotrig,LOW);
-
-  return pulseIn(pinoecho,HIGH)/58;
-}
 
